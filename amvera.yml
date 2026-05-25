@@ -2,12 +2,14 @@ meta:
   environment: python
   toolchain:
     name: pip
-    version: "3.13"
+    version: "3.12"
+
 build:
   requirementsPath: requirements.txt
+
 run:
-  command: gunicorn "run:create_app()"
-  persistence:
-    - path: study_platform.db
+  command: gunicorn --bind 0.0.0.0:80 app:create_app()
   persistenceMount: /data
-  containerPort: ""
+  containerPort: 80 
+
+  

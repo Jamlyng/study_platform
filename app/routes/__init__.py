@@ -11,6 +11,16 @@ login_manager.login_message = 'Пожалуйста, войдите для до�
 
 def create_app():
     app = Flask(__name__)
+
+     # Определяем, запущены ли мы в Amvera
+    if "AMVERA" in os.environ:
+        # В облаке используем постоянное хранилище
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/study_platform.db'
+        app.config['UPLOAD_FOLDER'] = '/data/uploads'
+    else:
+        # Локально используем настройки из config.py
+        app.config.from_object(Config)
+
     app.config.from_object(Config)
 
     # Явно указываем static_folder относительно корня проекта
