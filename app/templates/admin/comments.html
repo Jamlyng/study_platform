@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Управление комментариями</h2>
+<a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary mb-3">← Назад</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Автор</th>
+            <th>Текст</th>
+            <th>К материалу</th>
+            <th>Дата</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in comments %}
+        <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.user.full_name }}</td>
+            <td>{{ c.text[:50] }}{% if c.text|length > 50 %}...{% endif %}</td>
+            <td><a href="{{ url_for('materials.material_detail', id=c.material_id) }}">{{ c.material.title[:30] }}</a></td>
+            <td>{{ c.created_at.strftime('%d.%m.%Y') }}</td>
+            <td>
+                <a href="{{ url_for('admin.delete_comment', id=c.id) }}" class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Удалить комментарий?')">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        {% set avatar_url = url_for('static', filename='uploads/' + user.avatar) if user.avatar else 'https://via.placeholder.com/150' %}
+        <img src="{{ avatar_url }}" class="img-fluid rounded-circle" width="150" onerror="this.src='https://via.placeholder.com/150'">
+        <h3>{{ user.full_name }}</h3>
+        <p>{{ user.bio }}</p>
+        <p>Факультет: {{ user.faculty or 'Не указан' }}</p>
+        <p>Курс: {{ user.course or 'Не указан' }}</p>
+        <p>Рейтинг: {{ user.rating }}</p>
+        <p>На платформе с {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+        {% if current_user.is_authenticated and current_user.id == user.id %}
+        <div class="mt-2">
+            <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-sm btn-outline-primary">Редактировать профиль</a>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        <h4>Материалы пользователя</h4>
+        <div class="row">
+            {% for material in materials %}
+            <div class="col-md-6 mb-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>{{ material.title }}</h5>
+                        <div class="mb-2">
+                            {% for tag in material.tags %}
+                                <a href="{{ url_for('materials.browse', tag=tag.name) }}" class="badge bg-light text-dark text-decoration-none">{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
+                        <a href="{{ url_for('materials.material_detail', id=material.id) }}" class="btn btn-sm btn-primary">Открыть</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p>Пока нет загруженных материалов.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

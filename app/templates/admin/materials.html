@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Управление материалами</h2>
+<a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary mb-3">← Назад</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Автор</th>
+            <th>Предмет</th>
+            <th>Дата</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in materials %}
+        <tr>
+            <td>{{ m.id }}</td>
+            <td><a href="{{ url_for('materials.material_detail', id=m.id) }}">{{ m.title }}</a></td>
+            <td>{{ m.author.full_name }}</td>
+            <td>{{ m.subject.name if m.subject else '-' }}</td>
+            <td>{{ m.created_at.strftime('%d.%m.%Y') }}</td>
+            <td>
+                <a href="{{ url_for('admin.delete_material', id=m.id) }}" class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Удалить материал «{{ m.title }}»?')">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

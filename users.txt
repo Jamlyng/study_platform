@@ -1,0 +1,10 @@
+Иван Петров,ivan@mail.ru,pass1234,student
+Мария Сидорова,maria@mail.ru,pass1234,student
+Алексей Иванов,alex@mail.ru,pass1234,student
+Дмитрий Смирнов,dmitry@mail.ru,pass1234,student
+Елена Кузнецова,elena@mail.ru,pass1234,student
+Студент Тест,student@study.ru,student123,student
+Преподаватель Тест,teacher@study.ru,teacher123,teacher
+Сергей Волков,sergey.volkov@study.ru,teacher123,teacher
+Анна Морозова,anna.morozova@study.ru,teacher123,teacher
+Администратор,admin@study.ru,admin123,admin

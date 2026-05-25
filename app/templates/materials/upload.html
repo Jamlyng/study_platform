@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Загрузить материал</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.title.label }}
+                {{ form.title(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label }}
+                {{ form.description(class="form-control", rows=4) }}
+            </div>
+            <div class="mb-3">
+                {{ form.type.label }}
+                {{ form.type(class="form-select") }}
+            </div>
+            <div class="mb-3">
+                {{ form.subject_name.label(class="form-label") }}
+                {{ form.subject_name(class="form-control", id="subject-input", placeholder="Начните вводить название предмета...", autocomplete="off") }}
+                <div id="subject-suggestions" class="list-group position-absolute" style="z-index: 1000; display: none;"></div>
+                <div class="form-text">Введите название. Если предмета нет, он создастся автоматически.</div>
+            </div>
+            <div class="mb-3">
+                {{ form.course.label }}
+                {{ form.course(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.tags.label(class="form-label") }}
+                {{ form.tags(class="form-control", placeholder="Например: матрицы, экзамен, 2 курс") }}
+                <div class="form-text">Введите теги через запятую</div>
+            </div>
+            <div class="mb-3">
+                {{ form.files.label(class="form-label") }}
+                {{ form.files(class="form-control", multiple=True) }}
+                <div class="form-text">Можно выбрать несколько файлов (PDF, изображения, документы)</div>
+            </div>
+            {{ form.submit(class="btn btn-success") }}
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('subject-input');
+    const suggestions = document.getElementById('subject-suggestions');
+    let timeout;
+
+    input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+        
+        if (query.length === 0) {
+            suggestions.style.display = 'none';
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch('/materials/api/subjects?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        suggestions.innerHTML = data.map(s => 
+                            `<div class="list-group-item list-group-item-action py-1" data-name="${s.name}">${s.name}</div>`
+                        ).join('');
+                        suggestions.style.display = 'block';
+                        
+                        // Обработка клика по подсказке
+                        suggestions.querySelectorAll('.list-group-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                input.value = this.dataset.name;
+                                suggestions.style.display = 'none';
+                            });
+                        });
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                });
+        }, 200);  // задержка 200мс, чтобы не дёргать сервер на каждую букву
+    });
+
+    // Скрывать подсказки при клике вне
+    document.addEventListener('click', function(e) {
+        if (e.target !== input && e.target !== suggestions) {
+            suggestions.style.display = 'none';
+        }
+    });
+
+    // Навигация с клавиатуры
+    let selectedIndex = -1;
+    input.addEventListener('keydown', function(e) {
+        const items = suggestions.querySelectorAll('.list-group-item');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+            updateSelection(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            updateSelection(items);
+        } else if (e.key === 'Enter' && selectedIndex >= 0) {
+            e.preventDefault();
+            if (items[selectedIndex]) {
+                input.value = items[selectedIndex].dataset.name;
+                suggestions.style.display = 'none';
+                selectedIndex = -1;
+            }
+        }
+    });
+
+    function updateSelection(items) {
+        items.forEach((item, i) => {
+            item.classList.toggle('active', i === selectedIndex);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Каталог материалов</h2>
+
+<!-- Поиск и фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2">
+            <div class="col-md-4">
+                <input class="form-control" name="q" value="{{ search }}" placeholder="Поиск по названию, описанию, тегам...">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="subject">
+                    <option value="">Все предметы</option>
+                    {% for s in subjects %}
+                        <option value="{{ s.name }}" {% if current_subject == s.name %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="type">
+                    <option value="">Все типы</option>
+                    <option value="конспект" {% if current_type == 'конспект' %}selected{% endif %}>Конспект</option>
+                    <option value="решение" {% if current_type == 'решение' %}selected{% endif %}>Решение</option>
+                    <option value="видео" {% if current_type == 'видео' %}selected{% endif %}>Видео</option>
+                    <option value="презентация" {% if current_type == 'презентация' %}selected{% endif %}>Презентация</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="sort">
+                    <option value="date" {% if sort == 'date' %}selected{% endif %}>Новые</option>
+                    <option value="rating" {% if sort == 'rating' %}selected{% endif %}>По рейтингу</option>
+                    <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Популярные</option>
+                    <option value="downloads" {% if sort == 'downloads' %}selected{% endif %}>Скачиваемые</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">🔍 Найти</button>
+            </div>
+        </form>
+
+        {% if all_tags %}
+        <div class="mt-2">
+            <small class="text-muted">Теги:</small>
+            {% for tag in all_tags %}
+                <a href="{{ url_for('materials.browse', tag=tag.name, q=search, subject=current_subject, type=current_type, sort=sort) }}" 
+                   class="badge {% if tag_filter == tag.name %}bg-primary{% else %}bg-light text-dark{% endif %} text-decoration-none me-1">
+                    {{ tag.name }}
+                </a>
+            {% endfor %}
+            {% if tag_filter or search or current_subject or current_type %}
+                <a href="{{ url_for('materials.browse') }}" class="btn btn-sm btn-outline-danger ms-2">✕ Сбросить</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Результаты -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span>Найдено: {{ pagination.total }} материалов</span>
+    <span>Страница {{ pagination.page }} из {{ pagination.pages }}</span>
+</div>
+
+<div class="row">
+    {% for material in materials %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ material.title }}</h5>
+                <p class="card-text text-muted small">{{ material.description[:120] if material.description else 'Без описания' }}</p>
+                
+                <span class="badge bg-secondary">{{ material.type }}</span>
+                <span class="badge bg-info">{{ material.subject.name if material.subject else '—' }}</span>
+                
+                {% if material.tags.count() > 0 %}
+                <div class="mt-1">
+                    {% for tag in material.tags %}
+                        <a href="{{ url_for('materials.browse', tag=tag.name) }}" class="badge bg-light text-dark text-decoration-none">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="mt-2 small text-muted">
+                    ⭐ {{ '%.1f' % material.average_rating }} | 👁 {{ material.views }} | ⬇ {{ material.downloads }}
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ material.author.full_name }}</small>
+                    <a href="{{ url_for('materials.material_detail', id=material.id) }}" class="btn btn-sm btn-primary">Открыть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <p class="text-center text-muted">Ничего не найдено. Попробуйте изменить параметры поиска.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if pagination.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('materials.browse', page=pagination.prev_num, q=search, subject=current_subject, type=current_type, tag=tag_filter, sort=sort) }}">← Назад</a>
+            </li>
+        {% endif %}
+
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('materials.browse', page=page_num, q=search, subject=current_subject, type=current_type, tag=tag_filter, sort=sort) }}">{{ page_num }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('materials.browse', page=pagination.next_num, q=search, subject=current_subject, type=current_type, tag=tag_filter, sort=sort) }}">Вперёд →</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

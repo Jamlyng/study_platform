@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Редактирование профиля</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.full_name.label(class="form-label") }}
+                {{ form.full_name(class="form-control") }}
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    {{ form.faculty.label(class="form-label") }}
+                    {{ form.faculty(class="form-control") }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.course.label(class="form-label") }}
+                    {{ form.course(class="form-control") }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form.bio.label(class="form-label") }}
+                {{ form.bio(class="form-control", rows=5) }}
+            </div>
+
+            <!-- Аватар -->
+            <div class="mb-3">
+                <label class="form-label">Фото профиля</label>
+
+                <!-- Текущий аватар -->
+                <div class="mb-2">
+                    {% set avatar_url = url_for('static', filename='uploads/' + current_user.avatar) if current_user.avatar else 'https://via.placeholder.com/100' %}
+                    <img id="preview-avatar" src="{{ avatar_url }}" alt="Аватар"
+                         class="rounded-circle" width="100" height="100" style="object-fit: cover;"
+                         onerror="this.src='https://via.placeholder.com/100'">
+                </div>
+
+                <!-- Стандартные аватары -->
+                <div class="mb-2">
+                    <label class="form-label small">Стандартные аватары:</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for avatar in default_avatars %}
+                        <div class="text-center">
+                            <input type="radio" name="default_avatar" value="{{ avatar }}"
+                                   id="def_{{ loop.index }}" class="d-none"
+                                   onchange="selectDefaultAvatar('{{ avatar }}')">
+                            <label for="def_{{ loop.index }}">
+                                <img src="{{ url_for('static', filename='uploads/defaults_avatars/' + avatar) }}"
+                                     class="rounded-circle border border-2 {% if current_user.avatar == 'images/defaults/' + avatar %}border-primary{% else %}border-light{% endif %}"
+                                     width="60" height="60" style="object-fit: cover; cursor: pointer;"
+                                     onerror="this.src='https://via.placeholder.com/60'">
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Свой файл -->
+                <div class="mt-2">
+                    <label class="form-label small">Или загрузите свой:</label>
+                    {{ form.avatar(class="form-control", id="custom-avatar-input", onchange="previewCustomAvatar(event)") }}
+                </div>
+            </div>
+
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('profile.user_profile', id=current_user.id) }}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectDefaultAvatar(filename) {
+    document.getElementById('custom-avatar-input').value = '';
+
+    document.getElementById('preview-avatar').src = '{{ url_for("static", filename="uploads/defaults_avatars/") }}' + filename;
+
+    document.querySelectorAll('input[name="default_avatar"]').forEach(radio => {
+        const label = radio.nextElementSibling.querySelector('img');
+        if (radio.value === filename) {
+            label.classList.add('border-primary');
+            label.classList.remove('border-light');
+        } else {
+            label.classList.add('border-light');
+            label.classList.remove('border-primary');
+        }
+    });
+}
+
+function previewCustomAvatar(event) {
+    document.querySelectorAll('input[name="default_avatar"]').forEach(radio => {
+        radio.checked = false;
+        const label = radio.nextElementSibling.querySelector('img');
+        label.classList.add('border-light');
+        label.classList.remove('border-primary');
+    });
+
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-avatar').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+{% endblock %}

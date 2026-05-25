@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>Избранное</h3>
+<div class="row">
+    {% for fav in favorites %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>{{ fav.material.title }}</h5>
+                <p>{{ fav.material.description[:100] }}</p>
+                <a href="{{ url_for('materials.material_detail', id=fav.material.id) }}" class="btn btn-sm btn-primary">Открыть</a>
+                <form method="POST" action="{{ url_for('materials.toggle_favorite', material_id=fav.material.id) }}" class="d-inline">
+                    <button class="btn btn-sm btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>У вас нет избранных материалов.</p>
+    {% endfor %}
+</div>
+{% endblock %}

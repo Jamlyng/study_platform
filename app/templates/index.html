@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Приветственный блок -->
+<div class="bg-primary text-white rounded p-4 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1>StudyPlatform</h1>
+            <p class="lead mb-0">Обменивайся учебными материалами, оценивай конспекты, помогай сокурсникам.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">Присоединиться</a>
+            {% else %}
+                <a href="{{ url_for('materials.upload') }}" class="btn btn-light btn-lg">Загрузить материал</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row text-center mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <h3 class="text-primary">{{ stats.materials }}</h3>
+                <p class="text-muted mb-0">материалов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <h3 class="text-primary">{{ stats.users }}</h3>
+                <p class="text-muted mb-0">пользователей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <h3 class="text-primary">{{ stats.subjects }}</h3>
+                <p class="text-muted mb-0">предметов</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Быстрый поиск -->
+<div class="row mb-4">
+    <div class="col-md-8 mx-auto">
+        <form action="{{ url_for('main.index') }}" method="GET" class="d-flex">
+            <input class="form-control form-control-lg me-2" name="q" 
+                   placeholder="Поиск по названию, описанию, тегам..." value="{{ search }}">
+            <button class="btn btn-primary btn-lg" type="submit">🔍 Найти</button>
+        </form>
+        <div class="text-center mt-2">
+            <a href="{{ url_for('materials.browse') }}">Расширенный поиск в каталоге →</a>
+        </div>
+    </div>
+</div>
+
+<!-- Последние материалы -->
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Последние материалы</h4>
+        <a href="{{ url_for('materials.browse', sort='date') }}" class="btn btn-outline-primary btn-sm">Все →</a>
+    </div>
+    <div class="row">
+        {% for material in latest %}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ material.title }}</h5>
+                    <p class="card-text text-muted small">{{ material.description[:80] if material.description else '' }}</p>
+                    <span class="badge bg-secondary">{{ material.type }}</span>
+                    <span class="badge bg-info">{{ material.subject.name if material.subject }}</span>
+                    <div class="mt-1 small text-muted">
+                        ⭐ {{ '%.1f' % material.average_rating }} | 👁 {{ material.views }}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">{{ material.author.full_name }}</small>
+                    <a href="{{ url_for('materials.material_detail', id=material.id) }}" class="btn btn-sm btn-primary float-end">Открыть</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">Пока нет материалов</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Топ по рейтингу -->
+{% if top_rated %}
+<div class="mb-4">
+    <h4>Лучшие по рейтингу</h4>
+    <div class="row">
+        {% for material in top_rated %}
+        <div class="col-md-4 mb-3">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ material.title }}</h5>
+                    <span class="badge bg-secondary">{{ material.type }}</span>
+                    <span class="badge bg-info">{{ material.subject.name if material.subject }}</span>
+                    <div class="mt-1">
+                        ⭐ {{ '%.1f' % material.average_rating }} ({{ material.ratings.count() }})
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('materials.material_detail', id=material.id) }}" class="btn btn-sm btn-outline-warning">Смотреть</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

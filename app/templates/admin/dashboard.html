@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Админ-панель</h2>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.users }}</h5>
+                <p class="card-text">Пользователей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.materials }}</h5>
+                <p class="card-text">Материалов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.comments }}</h5>
+                <p class="card-text">Комментариев</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.subjects }}</h5>
+                <p class="card-text">Предметов</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="list-group mt-3">
+    <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action">👥 Управление пользователями</a>
+    <a href="{{ url_for('admin.materials') }}" class="list-group-item list-group-item-action">📚 Управление материалами</a>
+    <a href="{{ url_for('admin.comments') }}" class="list-group-item list-group-item-action">💬 Управление комментариями</a>
+</div>
+{% endblock %}
