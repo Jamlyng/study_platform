@@ -1,0 +1,11 @@
+meta:
+  environment: python
+  toolchain:
+    name: pip
+    version: 3.10
+build:
+  requirementsPath: requirements.txt
+run:
+  command: gunicorn "run:create_app()"
+  persistence:
+    - path: study_platform.db
